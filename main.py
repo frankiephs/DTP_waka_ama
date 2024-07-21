@@ -495,3 +495,44 @@ class gui_c:
 
         # finalize
         self.current_frame.grid(row=0, column=0, sticky="NSEW")
+    def LogsScreen(self):
+        self.save_to_logfile("Logs Screen")
+
+        # Initialize Screen
+        log_win=CT.CTkToplevel()
+
+        # initialize the grid 3 rows
+        log_win.columnconfigure(0, weight=1)  # make sure column stretches
+        log_win.rowconfigure(1,weight=2) # center is much bigger
+        
+        # creating nav bar frame
+        nav_bar = CT.CTkFrame(log_win) 
+        nav_bar.grid(column=0, row=0, ipadx=10, ipady=10,sticky="NSEW") # coloumn span. fills the space for 3 cells.
+
+        # initialize nav bar to two columns
+        nav_bar.columnconfigure(0,weight=1)
+        nav_bar.columnconfigure(1, weight=1)
+
+        # Creating top Button
+        Back_Button = CT.CTkButton (nav_bar, text = "Back",command=log_win.destroy)
+        Back_Button.grid(row=0,column=0,sticky="NW",padx=10,pady=10)
+
+         # creating the body frame
+        body_frame = CT.CTkFrame(log_win)
+        body_frame.grid(column=0, row=1, ipadx=10, ipady=10,sticky="NSEW") # coloumn span. fills the space for 3 cells.
+        
+        # initialize the body frame to have only maxed 1 cell
+        body_frame.rowconfigure(0, weight=1)
+        body_frame.columnconfigure(0, weight=1)
+
+        # Creating the text box
+        Text = CT.CTkTextbox(body_frame,activate_scrollbars=True)
+        Text.grid(row=0,column=0,sticky="NSEW")
+    
+        # reading the logs ile
+        with open("logs", "r") as logfile_content:
+            logs_list = logfile_content.readlines()
+
+        # Inserting the logs files
+        for i in logs_list:
+            Text.insert(tk.END,i)
