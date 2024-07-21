@@ -337,4 +337,43 @@ class gui_c:
         self.files_regional_association_score_list = [] 
         self.current_file_index = 0
         self.root.after(self.loading_delay, self.process_file)
+    # scoring function
+    
+    def process_file(self): 
+
+        # start the loop
+        if self.current_file_index < len(self.filtered_files_list):
+            filename = self.filtered_files_list[self.current_file_index]
+            self.update_loading_label(f"Processing file: {filename}")
+            
+            # get all content
+            filepath = f"{self.year_path}/{filename}"
+            file_contents = fr.file_read_c.return_content(filepath)
+
+            # formats for more readability, assigns to the respective fields, returns the errors
+            formatted_file_contents = fr.file_read_c.format_content(file_contents, filename)   
+
+            # checks if there are errors and skips it. also add it on the error list if exist
+            if formatted_file_contents == "ERROR":
+                self.save_to_logfile(f"ERROR: {formatted_file_contents} | {filename}")
+                error = f"There is an error on your file: | {filename}"
+
+                # error display
+                if self.ShowError:
+                    messagebox.showwarning("Error while Processing", f"{error}\n\n -For more details, go to Help.\n -To check all errors, go to logs after this process")
+                print(formatted_file_contents)
+                
+                self.error_list.append(error)
+            else:
+                
+                # if file no errors, gets the scores
+                file_regional_association_scores = scoring.scoring_c.return_scores(formatted_file_contents, self.points_refference)
+
+                # place on the files scores list
+                self.files_regional_association_score_list.append(file_regional_association_scores)
+
+            self.current_file_index += 1
+            self.root.after(self.loading_delay, self.process_file)
+        else:
+            self.root.after(self.loading_delay, self.finalize_processing)
     
