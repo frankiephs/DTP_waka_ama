@@ -246,3 +246,38 @@ class gui_c:
                 
         else:
             messagebox.showerror("Incorrect Input", f"'{user_input}' is not a year")
+
+    def LoadingScreen(self, year_input):
+        self.save_to_logfile("Loading Screen")
+        self.current_frame = CT.CTkFrame(self.root)
+
+        # display the current frame
+        self.current_frame.grid(row=0, column=0, sticky="NSEW")
+
+        # initialize the frame to have only maxed 1 cell
+        self.current_frame.rowconfigure(0, weight=1)
+        self.current_frame.columnconfigure(0, weight=1)
+
+        # Create a group for the components
+        body_inner_frame = CT.CTkFrame(self.current_frame, fg_color="transparent")
+        body_inner_frame.grid(column=0, row=0, sticky="")
+
+        # Creating loading/Status label
+        self.Loading_label = CT.CTkLabel(body_inner_frame, text=f"{year_input} | Starting the program...")
+        self.Loading_label.grid()
+
+        # Creating the loading bar
+        self.progressbar = CT.CTkProgressBar(body_inner_frame, mode="indeterminate",indeterminate_speed=self.loading_delay)
+        self.progressbar.grid()
+
+        # Getting all files
+        path_prefix = "WakaNats"
+        self.year_path = fr.file_read_c.find_year_path(self.parent_path, year_input, prefix=path_prefix)
+        self.files_list = fr.file_read_c.return_files(self.year_path)
+
+        # Preparing to process files if found
+        if self.files_list:
+            self.update_loading_label(f"Getting files from year {self.selected_year}, {len(self.files_list)} files found")
+            self.root.after(self.loading_delay, self.process_files)
+        else:
+            self.update_loading_label("No files found")
