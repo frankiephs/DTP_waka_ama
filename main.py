@@ -387,3 +387,111 @@ class gui_c:
         # sorts the dictionary
         year_regional_association_scores = scoring.scoring_c.sort_score(year_regional_association_scores)
         self.show_screen(self.ResultsScreen, year_regional_association_scores)
+    def update_loading_label(self, text):
+        self.Loading_label.configure(text=text)
+        self.root.update_idletasks()
+        
+
+
+
+    def ResultsScreen(self, year_regional_association_scores):
+        self.save_to_logfile("Results Screen")
+
+        # Initialize the screen
+        self.current_frame = CT.CTkFrame(self.root)
+
+        # initialize the grid 3 rows
+        self.current_frame.rowconfigure(1,weight=1) # center is much bigger
+        self.current_frame.columnconfigure(0, weight=1)  # make sure column stretches
+        
+        # creating nav bar frame
+        nav_bar = CT.CTkFrame(self.current_frame) 
+        nav_bar.grid(column=0, row=0, ipadx=10, ipady=10,sticky="NSEW") # coloumn span. fills the space for 3 cells.
+
+        # initialize nav bar to two columns
+        nav_bar.columnconfigure(0,weight=1)
+        nav_bar.columnconfigure(1, weight=1)
+
+        # Creates the Home Button
+        Home_Button = CT.CTkButton (nav_bar, text = "Home",command=lambda: self.show_screen(self.HomeScreen),font=self.default_font)
+        Home_Button.grid(padx=10,pady=10, sticky="NW")
+
+
+        # creating the body frame
+        body_frame = CT.CTkFrame(self.current_frame)
+        body_frame.grid(column=0, row=1, ipadx=10, ipady=10,sticky="NSEW") # coloumn span. fills the space for 3 cells.
+        
+        # initialize the body frame to have only maxed 1 cell
+        body_frame.rowconfigure(0, weight=1)
+        body_frame.columnconfigure(0, weight=1)
+
+        # Create a group for the components
+        body_inner_frame = CT.CTkFrame(body_frame, fg_color="transparent")
+        body_inner_frame.grid(column=0, row=0, sticky="")
+
+
+
+        # Creates the Title
+        title = CT.CTkLabel(body_inner_frame, text=f"Results for {self.selected_year} {self.filter_keyword}", font=self.title_font)
+        title.grid()
+
+
+        # Creates the Scrollable table frame
+        table_frame = CT.CTkScrollableFrame(body_inner_frame, border_width=2,width=300)
+        table_frame.grid()
+
+        # initilizing the table
+        table_frame.columnconfigure(1, weight=1)  # Higher weight for column 1 in the first row
+        
+        # settings for the cells
+        cell_border_width = 1
+        cell_color = "transparent"
+        cell_height = 30
+        small_cell_width = 30
+
+        # Creates the table header cells
+        CT.CTkFrame(table_frame, border_width=cell_border_width,fg_color=cell_color,height=cell_height,width=small_cell_width).grid(row=0,column=0)
+        CT.CTkFrame(table_frame, border_width=cell_border_width,fg_color=cell_color,height=cell_height).grid(row=0,column=1)
+        CT.CTkFrame(table_frame, border_width=cell_border_width,fg_color=cell_color,height=cell_height,width=small_cell_width).grid(row=0,column=2)
+
+        # Creates the table header labels
+        CT.CTkLabel(table_frame, text="Place").grid(row=0, column=0)
+        CT.CTkLabel(table_frame, text="Regional Association").grid(row=0, column=1)
+        CT.CTkLabel(table_frame, text="Points").grid(row=0, column=2)
+        
+        # placing the regional association scores 
+        for place, i in enumerate(year_regional_association_scores.items(), start=1):
+            name, points = i
+
+            # Adds the cell
+            CT.CTkFrame(table_frame, border_width=cell_border_width,fg_color=cell_color,height=cell_height,width=small_cell_width).grid(row=place,column=0)
+            CT.CTkFrame(table_frame, border_width=cell_border_width,fg_color=cell_color,height=cell_height).grid(row=place,column=1)
+            CT.CTkFrame(table_frame, border_width=cell_border_width,fg_color=cell_color,height=cell_height,width=small_cell_width).grid(row=place,column=2)
+            
+            # Adds the labels
+            CT.CTkLabel(table_frame, text=place).grid(row=place, column=0)
+            CT.CTkLabel(table_frame, text=name).grid(row=place, column=1)
+            CT.CTkLabel(table_frame, text=points).grid(row=place, column=2)
+
+        # creating bottom bar frame
+        bottom_bar_frame = CT.CTkFrame(self.current_frame,border_width=3,corner_radius=0) 
+        bottom_bar_frame.grid(column=0, row=2, ipadx=10, ipady=10,sticky="NSEW") # coloumn span. fills the space for 3 cells.
+
+        # initialize nav bar to three columns
+        bottom_bar_frame.columnconfigure(0,weight=1)
+        bottom_bar_frame.columnconfigure(1, weight=1)
+        
+
+
+        # Creates the logs button
+        OpenLogs = CT.CTkButton(bottom_bar_frame,text="Open Logs", command= self.LogsScreen,font=self.default_font)
+        OpenLogs.grid(row=0, column=0, sticky="W", padx=10,pady=10)
+
+        # Creates the Save to CSV Button
+        SaveCSV = CT.CTkButton(bottom_bar_frame,text="Save to CSV",font=self.default_font, command=lambda:self.show_screen(self.pick_save,year_regional_association_scores))
+        SaveCSV.grid(row=0, column=1,sticky="E",padx=10,pady=10)
+
+
+
+        # finalize
+        self.current_frame.grid(row=0, column=0, sticky="NSEW")
