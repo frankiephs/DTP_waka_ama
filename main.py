@@ -297,3 +297,30 @@ class gui_c:
             # if no keywords are specified, skips the filtering processinbg and starts the scoring
             self.filtered_files_list = self.files_list
             self.root.after(self.loading_delay, self.process_filtered_files)
+    
+    def filter_files(self):
+
+        # looping the files in hte files_list
+        if self.current_file_index < len(self.files_list):
+            
+            # start by getting the filename
+            filename = self.files_list[self.current_file_index]
+            self.update_loading_label(f"Getting files from year {self.selected_year}, Checking {filename}...") # change statement
+
+            # if filtered case sensitive, finds the filename if the filter keyword is present then add it on the list
+            if self.filter_case_sensitive:
+                if self.filter_keyword in filename: # if the filename have keyword
+                    self.filtered_files_list.append(filename) # add the file in the file list
+                    self.update_loading_label(f"Getting files from year {self.selected_year}, {filename} satisfied") # change statement
+            
+            # if filtered case sensitve is False, lowercase the filename then add it on the list
+            else:
+                if self.filter_keyword.lower() in filename.lower(): # if the filename have keyword
+                    self.filtered_files_list.append(filename) # add the file in the file list
+                    self.update_loading_label(f"Getting files from year {self.selected_year}, {filename} satisfied") # change statement
+
+            # proceeds to another file on the list, repeat until the list is finished
+            self.current_file_index += 1 
+            self.root.after(self.loading_delay, self.filter_files) # repeat
+        else:
+            self.root.after(self.loading_delay, self.process_filtered_files) 
