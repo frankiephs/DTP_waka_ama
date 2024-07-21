@@ -1,3 +1,4 @@
-# Graphical User Interface /
-# Defining Class(es) and defining objects
-# Uses third party or non core API
+import customtkinter as CT # External Library
+import tkinter as tk # for GUI
+from tkinter import filedialog # for getting files
+
