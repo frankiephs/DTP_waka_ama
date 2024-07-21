@@ -57,6 +57,8 @@ class gui_c:
         # Show the home frame initially
         self.HomeScreen()
         self.save_to_logfile("Opened Program")
+
+        
     def HomeScreen(self):
         # initialize the screen
         self.current_frame = CT.CTkFrame(self.root)
@@ -113,6 +115,16 @@ class gui_c:
         # Finalize the Screen
         self.current_frame.grid(row=0, column=0, sticky="NSEW")
     
+    def get_folder_path(self):
+        self.save_to_logfile("Get Golder Path")
+        folder_path = filedialog.askdirectory()
 
+        if folder_path:
+            self.parent_path = folder_path
+            self.show_screen(self.SelectYearsScreen,data=folder_path)  # Pass function reference without calling it
+        else:
+            messagebox.showwarning("Error while Processing", "Invalid File Folder\n -For more details, go to Help.\n -To check all errors, go to logs after this process")
+        
+        
 
 
