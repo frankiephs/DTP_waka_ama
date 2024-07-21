@@ -629,3 +629,36 @@ class gui_c:
 
         # finalize
         self.current_frame.grid(row=0, column=0, sticky="NSEW")
+    
+    def show_screen(self, Screen_function,data=None):
+        self.save_to_logfile(f"Changed screen ")
+        if self.current_frame:
+            self.current_frame.grid_forget()  # Hide current frame
+            self.current_frame = None
+
+        if data:
+            Screen_function(data)
+        else:
+            try:
+                Screen_function(data)
+            except:
+                Screen_function()
+    
+    def save_to_logfile(self,data):
+        file_path = self.logs_path
+        try:
+            with open(file_path, 'a') as file:
+                # Ensure the string starts on a new line if the file already has content
+                current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+                if file.tell() != 0:
+                    file.write(f"\n{current_time}")
+                file.write(f"\n{data} ")
+            print(f"Log updated | {file_path}")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
+# Create the main Tkinter window
+root = CT.CTk()
+app = gui_c(root)
+root.mainloop()
