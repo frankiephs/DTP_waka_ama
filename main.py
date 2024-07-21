@@ -324,3 +324,17 @@ class gui_c:
             self.root.after(self.loading_delay, self.filter_files) # repeat
         else:
             self.root.after(self.loading_delay, self.process_filtered_files) 
+    def process_filtered_files(self):
+        self.save_to_logfile("Process Filtered Files")
+
+        # checks if there is the list is empty
+        if self.filtered_files_list == []:
+            messagebox.showinfo("Keyword Not found", f"There are no files containing '{self.filter_keyword}' found.\n\n -For more details, go to Help.\n -To check all errors, go to logs after this process")
+            self.show_screen(self.HomeScreen)
+            return
+
+        # resets for the next loop
+        self.files_regional_association_score_list = [] 
+        self.current_file_index = 0
+        self.root.after(self.loading_delay, self.process_file)
+    
