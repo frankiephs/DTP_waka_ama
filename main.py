@@ -377,3 +377,13 @@ class gui_c:
         else:
             self.root.after(self.loading_delay, self.finalize_processing)
     
+    # summing up the scores
+    def finalize_processing(self):
+        self.save_to_logfile("finalize Processing")
+
+        # returns the year sum in a dictionary
+        year_regional_association_scores = scoring.scoring_c.return_year_sum_score(self.files_regional_association_score_list)
+
+        # sorts the dictionary
+        year_regional_association_scores = scoring.scoring_c.sort_score(year_regional_association_scores)
+        self.show_screen(self.ResultsScreen, year_regional_association_scores)
