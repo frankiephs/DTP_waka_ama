@@ -553,3 +553,23 @@ class gui_c:
         
 
         help_screen.get_help_contents(self)
+
+        # finalize
+        self.current_frame.grid(row=0, column=0, sticky="NSEW")
+
+    def pick_save(self,year_regional_association_score):
+        self.save_to_logfile("Pick Save")
+
+        folder_path = filedialog.asksaveasfilename(defaultextension=".csv",
+                                             filetypes=[("CSV Files", "*.csv")])
+        
+        if folder_path:
+            answer = messagebox.askyesno("Confirm path",f"Are you sure you want to save to this location? \n {folder_path}")
+            if answer:
+                csv_export.csv_c.csv_export(year_regional_association_score,folder_path)
+                
+                self.show_screen(self.SaveScreen,(year_regional_association_score,folder_path))
+        else:
+            messagebox.showwarning("Error while Processing", "Invalid File Folder\n -For more details, go to Help.\n -To check all errors, go to logs after this process")
+            self.show_screen(self.ResultsScreen,year_regional_association_score)    
+    
