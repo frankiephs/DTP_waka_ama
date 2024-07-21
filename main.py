@@ -226,3 +226,23 @@ class gui_c:
         self.current_frame.grid(row=0, column=0, sticky="NSEW")
 
 
+    def select_year(self,year_input,years_dictionary,filter_input):
+        self.save_to_logfile("Select Year")
+        user_input = year_input.get() # returns into string
+        
+        filter_keyword = filter_input.get()
+
+        if filter_keyword:
+            messagebox.showinfo("Info", f"Keyword Specified: {filter_keyword}")
+            self.filter_keyword = filter_keyword
+        
+
+        if user_input.isdigit():
+            if user_input in list(years_dictionary.keys()):
+                self.selected_year = user_input
+                self.show_screen(self.LoadingScreen,user_input)
+            else:
+                messagebox.showerror("Incorrect Year", f"'{user_input}'is not part of the folders list")
+                
+        else:
+            messagebox.showerror("Incorrect Input", f"'{user_input}' is not a year")
