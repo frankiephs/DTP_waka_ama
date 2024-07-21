@@ -572,4 +572,60 @@ class gui_c:
         else:
             messagebox.showwarning("Error while Processing", "Invalid File Folder\n -For more details, go to Help.\n -To check all errors, go to logs after this process")
             self.show_screen(self.ResultsScreen,year_regional_association_score)    
-    
+    def SaveScreen(self,folder_n_scores):
+        
+        year_regional_association_score = folder_n_scores[0]
+        folder_path = folder_n_scores[1]
+
+        
+
+        self.save_to_logfile(f"{self.filter_keyword} {self.selected_year} results saved to CSV in {folder_path}")
+
+        # initializing screen
+        self.current_frame = CT.CTkFrame(self.root)
+
+        # initialize the grid 3 rows
+        self.current_frame.rowconfigure(1,weight=1) # center is much bigger
+        self.current_frame.columnconfigure(0, weight=1)  # make sure column stretches
+        
+
+        # creating nav bar frame
+        nav_bar = CT.CTkFrame(self.current_frame) 
+        nav_bar.grid(column=0, row=0, ipadx=10, ipady=10,sticky="NSEW") # coloumn span. fills the space for 3 cells.
+
+        # initialize nav bar to two columns
+        nav_bar.columnconfigure(0,weight=1)
+        nav_bar.columnconfigure(1, weight=1)
+
+        # Creating Back Button
+        Back_Button = CT.CTkButton (nav_bar, text = "Back",font=self.default_font,command=lambda: self.show_screen(self.ResultsScreen,year_regional_association_score))
+        Back_Button.grid(row=0,column=0, sticky="NW",padx=10,pady=10)
+
+
+        # creating the body frame
+        body_frame = CT.CTkFrame(self.current_frame)
+        body_frame.grid(column=0, row=1, ipadx=10, ipady=10,sticky="NSEW") # coloumn span. fills the space for 3 cells.
+        
+        # initialize the body frame to have only maxed 1 cell
+        body_frame.rowconfigure(0, weight=1)
+        body_frame.columnconfigure(0, weight=1)
+
+        # Create a group for the components
+        body_inner_frame = CT.CTkFrame(body_frame, fg_color="transparent")
+        body_inner_frame.grid(column=0, row=0, sticky="")
+
+
+        # Creating Results saved successfuly statement
+        CT.CTkLabel(body_inner_frame,font=self.title_font, text=f"{self.selected_year} {self.filter_keyword} results Successfully saved to CSV").grid()
+        CT.CTkLabel(body_inner_frame,font=self.heading_font, text=f"{folder_path}").grid()
+
+         # creating bottom bar frame
+        bottom_bar_frame = CT.CTkFrame(self.current_frame,border_width=3,corner_radius=0) 
+        bottom_bar_frame.grid(column=0, row=2, ipadx=10, ipady=10,sticky="NSEW") # coloumn span. fills the space for 3 cells.
+
+        # Creating Open Logs Button
+        OpenLogs = CT.CTkButton(bottom_bar_frame,font=self.default_font,text="Open Logs", command= self.LogsScreen)
+        OpenLogs.grid(sticky="W",padx=10,pady=10)
+
+        # finalize
+        self.current_frame.grid(row=0, column=0, sticky="NSEW")
