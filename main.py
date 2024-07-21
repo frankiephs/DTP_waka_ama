@@ -58,7 +58,7 @@ class gui_c:
         self.HomeScreen()
         self.save_to_logfile("Opened Program")
 
-        
+
     def HomeScreen(self):
         # initialize the screen
         self.current_frame = CT.CTkFrame(self.root)
@@ -125,6 +125,104 @@ class gui_c:
         else:
             messagebox.showwarning("Error while Processing", "Invalid File Folder\n -For more details, go to Help.\n -To check all errors, go to logs after this process")
         
+    def SelectYearsScreen(self, parent_path):
+
+        # initialize the screen
+        self.save_to_logfile("Select Years screen")
+        self.current_frame = CT.CTkFrame(self.root)
+
+        # initialize the grid 3 rows
+        self.current_frame.rowconfigure(1,weight=1) # center is much bigger
+        self.current_frame.columnconfigure(0, weight=1)  # make sure column stretches
+
+        # creating nav bar frame
+        nav_bar = CT.CTkFrame(self.current_frame) 
+        nav_bar.grid(column=0, row=0, ipadx=10, ipady=10,sticky="NSEW") # coloumn span. fills the space for 3 cells.
+
+        # initialize nav bar to two columns
+        nav_bar.columnconfigure(0,weight=1)
+        nav_bar.columnconfigure(1, weight=1)
+
+        # adding nav bar back button
+        Back_Button = CT.CTkButton (nav_bar, text = "Back",font=self.default_font,command=lambda: self.show_screen(self.HomeScreen))
+        Back_Button.grid(column=0,row=0,sticky="NW",padx=10,pady=10)
+
+        # creating the body frame
+        body_frame = CT.CTkFrame(self.current_frame)
+        body_frame.grid(column=0, row=1, ipadx=10, ipady=10,sticky="NSEW") # coloumn span. fills the space for 3 cells.
+
+        # initialize the body frame to have only maxed 1 cell
+        body_frame.rowconfigure(0, weight=1)
+        body_frame.columnconfigure(0, weight=1)
+
         
+        # Create a group for the components
+        body_inner_frame = CT.CTkFrame(body_frame, fg_color="transparent")
+        body_inner_frame.grid(column=0, row=0, sticky="")
+
+
+        # Title
+        title = CT.CTkLabel(body_inner_frame,text="Select year", font=self.title_font)
+        title.grid()
+
+        # Available years label
+        available_years_label = CT.CTkLabel(body_inner_frame,text="Available Year/s", font=self.heading_font)
+        available_years_label.grid()
+
+        # Table Label
+        headers_label = CT.CTkLabel(body_inner_frame,text="Year | Files",font=self.default_font)
+        headers_label.grid()
+
+        # fetch the children folders
+        try:
+            years_and_files = fr.file_read_c.return_years(parent_path)
+        except:
+            error = f"[Invalid folder] Select Another folder | {parent_path}"
+            messagebox.showwarning("Error while Processing", f"{error}\n\n -For more details, go to Help.\n -To check all errors, go to logs after this process")
+            self.show_screen(self.HomeScreen)
+            return
+            
+
+        
+        # years & Files Table
+        
+        for i in years_and_files:
+            year_label = CT.CTkLabel(body_inner_frame,text=f"{i} : {years_and_files[i]} file/s",font=self.default_font)
+            year_label.grid()
+        
+
+        # creating bottom bar frame
+        bottom_bar_frame = CT.CTkFrame(self.current_frame,border_width=3,corner_radius=0) 
+        bottom_bar_frame.grid(column=0, row=2, ipadx=10, ipady=10,sticky="NSEW") # coloumn span. fills the space for 3 cells.
+
+        # initialize nav bar to three columns
+        bottom_bar_frame.columnconfigure(0,weight=1)
+        bottom_bar_frame.columnconfigure(1, weight=1)
+        bottom_bar_frame.columnconfigure(2, weight=1)
+
+        # input configuration
+        placeholder_color = "white"
+        year_input_placeholder = "Enter year"
+        filter_input_placeholder = "Enter filter keyword"
+
+
+        
+        bottom_contents_pady = 20
+
+        # Years Input
+        year_input = CT.CTkEntry(bottom_bar_frame,font=self.default_font, fg_color="grey",width=200,placeholder_text=year_input_placeholder, placeholder_text_color=placeholder_color)
+        year_input.grid(column=0,row=0,pady=bottom_contents_pady,sticky="E")
+
+        # Filter input
+        filter_input = CT.CTkEntry(bottom_bar_frame,fg_color='grey',font=self.default_font,width=300,placeholder_text=filter_input_placeholder, placeholder_text_color=placeholder_color)
+        filter_input.grid(column=1,row=0,pady=bottom_contents_pady)
+
+        # Continue Button
+        select_year_button = CT.CTkButton(bottom_bar_frame,text="Continue",font=self.heading_font,command= lambda : self.select_year(year_input,years_and_files, filter_input))
+        select_year_button.grid(column=2,row=0,pady=bottom_contents_pady)
+
+
+        # Finalize
+        self.current_frame.grid(row=0, column=0, sticky="NSEW")
 
 
