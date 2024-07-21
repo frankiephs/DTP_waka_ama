@@ -536,3 +536,20 @@ class gui_c:
         # Inserting the logs files
         for i in logs_list:
             Text.insert(tk.END,i)
+    def HelpScreen(self):
+        self.save_to_logfile("Help Screen")
+        
+        # initialize screen
+        self.current_frame = CT.CTkFrame(self.root)
+
+        # Creating Back Button
+        Back_Button = CT.CTkButton (self.current_frame, text = "Back",command=lambda: self.show_screen(self.HomeScreen))
+        Back_Button.grid()
+
+        # Creating Title Label
+        Title = CT.CTkLabel(self.current_frame, text="Help Screen")
+        Title.grid()
+
+        
+
+        help_screen.get_help_contents(self)
