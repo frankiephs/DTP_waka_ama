@@ -281,3 +281,19 @@ class gui_c:
             self.root.after(self.loading_delay, self.process_files)
         else:
             self.update_loading_label("No files found")
+    
+    
+    def process_files(self):
+        self.save_to_logfile("Process Files")
+
+        # preparing to filter the files if filter keyword is specified
+        if self.filter_keyword: 
+
+            # initializing the list and the index for iterations
+            self.filtered_files_list = []
+            self.current_file_index = 0
+            self.root.after(self.loading_delay, self.filter_files)
+        else:
+            # if no keywords are specified, skips the filtering processinbg and starts the scoring
+            self.filtered_files_list = self.files_list
+            self.root.after(self.loading_delay, self.process_filtered_files)
