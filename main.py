@@ -6,6 +6,8 @@ import csv_export
 import tkinter as tk
 
 
+
+
 class program_functions_component():
     def __init__(self):
 
@@ -147,11 +149,6 @@ class program_functions_component():
             return f"No lif files are found in {self.target_year}"
     
         
-        
-        
-        
-
-
 
     def read_n_categorize_file(self,lif_file):
 
@@ -268,15 +265,36 @@ class program_functions_component():
         regional_association_results = dict(sorted(regional_association_results.items(), key=lambda item: item[1], reverse=True))
         return regional_association_results
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class gui_component():
     def __init__(self):   
         self.root = ct.CTk() # opens the customtkinter library
         self.root.geometry("700x600") # widthxheight
         
 
-        # constants
-        SCALE_CONSTANT = 1.5 # 1.5 is a suitable # scale constant for scaling the widget and the window
-        FONT_BASE_CONSTANT = 20 / SCALE_CONSTANT # also increases the fonts size relative to the scale constant
+        # Constants (default)
+        self.SCALE_CONSTANT = 1.5 # 1.5 is a suitable # scale constant for scaling the widget and the window
+        self.FONT_BASE_CONSTANT = 50  # also increases the fonts size relative to the scale constant
         self.POINTS_REFFERENCE = {
                 "1":8,
                 "2":7,
@@ -288,18 +306,40 @@ class gui_component():
                 "8":1,
                 ">":1,
                 }
+        # widget colors
+        self.PLACEHOLDER_COLOR = "#696E77"
+        self.BORDER_WIDTH =2
+        self.CORNER_COLOR = "#2A2C30"
+        self.CORNDER_RADIUS = 5
+        self.BACKGROUND_COLOR = "#111113"
+
+        self.COLOR_THEME = "blue"
+        self.SHOW_ERROR = True
+        self.SAVE_TO_CSV = True
+        self.APPEARANCE_MODE = "dark"
+
+        # Parse settings
+
+
+
+
+
+
+
+
+
 
 
         # fonts
-        self.title_font = ct.CTkFont(size=int(FONT_BASE_CONSTANT * SCALE_CONSTANT),weight="bold") # Creates a bold and big font for the title
+        self.title_font = ct.CTkFont(size=int(self.FONT_BASE_CONSTANT / self.SCALE_CONSTANT * self.SCALE_CONSTANT),weight="bold") # Creates a bold and big font for the title
 
         # window scaling
-        ct.set_window_scaling(SCALE_CONSTANT * 0.4)  # Increase the widget size by scale constant
-        ct.set_widget_scaling(SCALE_CONSTANT * 0.9)  # Increase window size by scale constant
+        ct.set_window_scaling(self.SCALE_CONSTANT * 0.4)  # Increase the widget size by scale constant
+        ct.set_widget_scaling(self.SCALE_CONSTANT * 0.9)  # Increase window size by scale constant
 
         # theme
-        ct.set_appearance_mode("light") # makes the UI light mode. There is dark,system,light.
-        ct.set_default_color_theme("green") # changes the theme. There is "blue" (standard), "green", "dark-blue"
+        ct.set_appearance_mode(self.APPEARANCE_MODE) # makes the UI light mode. There is dark,system,light.
+        ct.set_default_color_theme(self.COLOR_THEME) # changes the theme. There is "blue" (standard), "green", "dark-blue"
 
 
         # maximize root
@@ -307,9 +347,7 @@ class gui_component():
         self.root.columnconfigure(0,weight=1) # maximize the root window to only 1 column
         
 
-
-        # Homepage variables
-        # -- data processing # Creating variables to be used in the program # do not change
+        # Homepage Variables
         self.processed_year_files = "" # variable if for all the year files count
         self.processed_year_filtered_files = "" # variable for all the final processed year files count
         self.current_loading_file = "" # current file being processed
@@ -321,83 +359,150 @@ class gui_component():
         # starts homepage
         self.home_screen() # starts the homepage function
 
+
     
     def home_screen(self):
         self.remove_current_screen()
 
-        # homepage frame
-        homepage_frame = ct.CTkFrame(self.root) # creates the homepage frame
+        # Creates homepage frame
+        homepage_frame = ct.CTkFrame(self.root,fg_color=self.BACKGROUND_COLOR) # creates the homepage frame
         homepage_frame.grid(row=0,column=0,sticky="NSEW") # displays the homepage frame to the maximizes root window specified earlier
 
-        # setup homepage frame 3 rows
-        # -- make it non resizable
-        homepage_frame.rowconfigure(0,weight=0) # make the row non resizable 
-        # -- title
-        homepage_frame.rowconfigure(1,weight=1) # title size == left+right panel size
-        # -- left and right panel
-        homepage_frame.rowconfigure(2,weight=1) # title size == left+right panel size
+        # configure 2 rows
+        # -- nav frame
+        homepage_frame.rowconfigure(0,weight=0) 
+        # -- body
+        homepage_frame.rowconfigure(1,weight=1) 
 
         # -- maximizes the col 
-        homepage_frame.columnconfigure(0,weight=1) # removes the homepage columns
+        homepage_frame.columnconfigure(0,weight=1) 
 
 
-        
-        
+        # nav bar frame
+        nav_bar_frame = ct.CTkFrame(homepage_frame,corner_radius=self.CORNDER_RADIUS,border_color=self.CORNER_COLOR,border_width=self.BORDER_WIDTH,fg_color=self.BACKGROUND_COLOR,height=20)
+        nav_bar_frame.grid(row=0, column=0,padx=20,pady=20)
 
-        # help button
-        # -- width 0 to maximize
-        help_button = ct.CTkButton(homepage_frame,text="Help",width=0,command=self.help_screen) # maximize the button width to the text
-        help_button.grid(row=0,column=0,padx=10,pady=10,sticky="ne") # displaces the help button on the 'north east'
+        # for the settings button
+        nav_bar_frame.columnconfigure(0,weight=1)
+        # for the logs button
+        nav_bar_frame.columnconfigure(1,weight=1)
+        # for the Help button
+        nav_bar_frame.columnconfigure(2,weight=1)
 
-        
+        # max the row
+        nav_bar_frame.rowconfigure(0,weight=0)
+    
+        # Settings button
+        settings_button = ct.CTkButton(nav_bar_frame,text="Settings",width=0,command=self.help_screen,fg_color="transparent") # maximize the button width to the text
+        settings_button.grid(row=0,column=0,padx=10,pady=2) # displaces the help button on the 'north east'
 
-        # title 
-        title_label = ct.CTkLabel(homepage_frame,text="Waka Ama leaderboard system",font=self.title_font) # Creates the title with its text
-        title_label.grid(row=1,column=0,sticky="nsew") # maximize the display on the its row with using sticky arguement and value "north south east west" 
-        
-        
+        # Logs button
+        logs_button = ct.CTkButton(nav_bar_frame,text="Logs",width=0,command=self.help_screen,fg_color="transparent") # maximize the button width to the text
+        logs_button.grid(row=0,column=1,pady=2) # displaces the help button on the 'north east'
+
+        # Help button
+        help_button = ct.CTkButton(nav_bar_frame,text="Help",width=0,command=self.help_screen,fg_color="transparent") # maximize the button width to the text
+        help_button.grid(row=0,column=2,padx=10,pady=2) # displaces the help button on the 'north east'
 
 
+
+
+
+        # Body frame
+        body_frame = ct.CTkFrame(homepage_frame, fg_color="transparent")
+        body_frame.grid(row=1, column=0,sticky="nsew")
+
+        body_frame.rowconfigure(0,weight=1)
+        body_frame.columnconfigure(0,weight=1)
 
         # inner frame
-        inner_frame = ct.CTkFrame(homepage_frame) # Creates the inner frame for the input boxes, etc.
-        inner_frame.grid(row=2,column=0,sticky="nsew") # maximizes it again
+        
+        # inner frame
+        inner_frame = ct.CTkFrame(body_frame,fg_color=self.BACKGROUND_COLOR) # Creates the inner frame for the input boxes, etc.
+        inner_frame.grid(row=0,column=0) # maximizes it again
 
-        # configure the inner frame: 3 rows, 2 columns
-        inner_frame.rowconfigure(0,weight=1) # all equal
+
+        # configure the inner frame: 2 rows 2 cols
+        inner_frame.rowconfigure(0,weight=3) # all equal
         inner_frame.rowconfigure(1,weight=1) # all equal
-        inner_frame.rowconfigure(2,weight=1) # all equal
-
-
+        
         inner_frame.columnconfigure(0,weight=1) # column equal
         inner_frame.columnconfigure(1,weight=1) # column equal
         
+
+        # title 
+        title_label = ct.CTkLabel(inner_frame,text="Waka Ama leaderboard system",font=self.title_font) # Creates the title with its text
+        title_label.grid(columnspan=2,row=0,column=0,padx=50,pady=50,sticky="nsew") # maximize the display on the its row with using sticky arguement and value "north south east west" 
+        
+        # open folder
+        self.input_parent = ct.CTkEntry(inner_frame,
+                                        placeholder_text_color=self.PLACEHOLDER_COLOR,
+                                        fg_color="transparent",
+                                        border_color=self.CORNER_COLOR,
+                                        border_width=self.BORDER_WIDTH,
+                                        corner_radius=self.CORNDER_RADIUS,
+                                        width=300,
+                                        placeholder_text="Type your parent folder locations") # Creates a button to open folder
+        
+        self.input_parent.grid(row=1,column=0,sticky="e") # displays the open folder
         
 
         # open folder
-        self.parent_folder_button = ct.CTkButton(inner_frame,text="Open folder",command=self.pick_folder) # Creates a button to open folder
-        self.parent_folder_button.grid(row=0,column=0) # displays the open folder
+        self.parent_folder_button = ct.CTkButton(inner_frame,text="Open folder",command=self.pick_folder,width=50) # Creates a button to open folder
+        self.parent_folder_button.grid(row=1,column=1,sticky="w",padx=10) # displays the open folder
         
+    def year_details_screen(self):
+
+        self.remove_current_screen()
+        year_details_frame = ct.CTkFrame(self.root)
+        year_details_frame.grid()
+
+        
+        # configure
+        year_details_frame.rowconfigure(0,weight=0)
+        year_details_frame.rowconfigure(1,weight=1)
+
+        year_details_frame.columnconfigure(0,weight=1)
+        
+        # nav bar frame
+        nav_bar_frame = ct.CTkFrame(year_details_frame,fg_color="transparent")
+        nav_bar_frame.grid(row=1, column=0)
+
+        # Back button
+        back_button = ct.CTkButton(nav_bar_frame)
+        back_button.grid(sticky="w",padx=30,pady=30)
+
+        # body frame
+        body_frame = ct.CTkFrame(year_details_frame)
+        body_frame.grid(row=1,column=0)
+
+        # configure
+        body_frame.rowconfigure(0,weight=0)
+        body_frame.rowconfigure(1,weight=0)
+        body_frame.rowconfigure(2,weight=0)
+        body_frame.rowconfigure(3,weight=0)
+        body_frame.rowconfigure(4,weight=0)
+        body_frame.rowconfigure(5,weight=0)
 
         # keyword input
-        self.keyword_input = ct.CTkEntry(inner_frame,placeholder_text="Type keyword") # Creates an input box for the keyword
+        self.keyword_input = ct.CTkEntry(body_frame,placeholder_text="Type keyword") # Creates an input box for the keyword
         self.keyword_input.grid(row=1,column=0) # displays the keyword input box
         self.processed_keyword = self.keyword_input.get()
 
         # year input
-        self.year_input = ct.CTkEntry(inner_frame,placeholder_text="Type year") # Creates the year input box
+        self.year_input = ct.CTkEntry(body_frame,placeholder_text="Type year") # Creates the year input box
         self.year_input.grid(row=2,column=0) # displays the year input box
         self.processed_year = self.year_input.get()
 
         # save to csv
-        self.save_to_csv_var = tk.BooleanVar(value=True)
-        self.save_to_csv_switch = ct.CTkSwitch(inner_frame,text="Save to CSV",variable=self.save_to_csv_var) # Creates save to CSV switch
+        self.save_to_csv_var = tk.BooleanVar(value=self.SAVE_TO_CSV)
+        self.save_to_csv_switch = ct.CTkSwitch(body_frame,text="Save to CSV",variable=self.save_to_csv_var) # Creates save to CSV switch
         self.save_to_csv_switch.grid(row=1,column=1) # displays save to csv switch
 
         # proceed
-        proceed_button = ct.CTkButton(inner_frame,text="Proceed",command=self.loading_screen) # Creates the proceed button
+        proceed_button = ct.CTkButton(body_frame,text="Proceed",command=self.loading_screen) # Creates the proceed button
         proceed_button.grid(row=2,column=1) #displays the proceed button
-
+        
 
 
     def loading_screen(self):
@@ -526,6 +631,7 @@ class gui_component():
         folder_path = filedialog.askdirectory()  # Open a folder selection dialog
         if folder_path: # checks if folder exists
                 self.parent_path = folder_path
+                self.year_details_screen()
         else: # if folder is not found
             self.error(title="folder error",message="pick a folder") # open error dialog. Folder error and the messaeg "Cannot open folder"
     
