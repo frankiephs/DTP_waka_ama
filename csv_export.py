@@ -1,19 +1,29 @@
+import tkinter as tk
+from tkinter import filedialog
 import csv
 
-class csv_c():
-    def __init__(self):
-        pass
 
-    @staticmethod
-    def csv_export(files_regional_association_score_list, csv_filename):
-        # returns True if successful and False if not
-            # CSV file name
+def export(regional_association_results):
 
-        # Writing to CSV
-        with open(csv_filename, 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(["Place", "Regional Association", "points"])  # Header
-            for i, (Regional_Association, points) in enumerate(files_regional_association_score_list.items(), 1):
-                writer.writerow([i, Regional_Association, points])
-        return True
+    # Ask user for file location
+    file_path = filedialog.asksaveasfilename(defaultextension=".csv",filetypes=[("CSV files", "*.csv")])
+    
+    if file_path:
+
+        with open(file_path, 'w', newline='') as csvfile:
+            csv_writer = csv.writer(csvfile)
+            
+            # Write header
+            csv_writer.writerow(["Regional Association", "Score"])
+            
+            # Write data rows
+            for association, score in regional_association_results.items():
+                csv_writer.writerow([association, score])
+        
+        return file_path
+    else:
+        return False
+    
+        
+    
     
