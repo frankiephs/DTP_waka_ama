@@ -494,7 +494,7 @@ class GuiComponent():
 
         # window init
         self.root = ct.CTk() 
-        self.root.geometry('700x600') 
+        self.root.geometry('2000x1000') 
         self.root.iconbitmap('icon.ico')
         self.root.title('Waka Ama Leaderboards system')
 
