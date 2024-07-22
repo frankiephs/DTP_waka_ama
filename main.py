@@ -4,8 +4,8 @@ from tkinter import messagebox # for pop dialogs
 from tkinter import filedialog # for opening folders
 import csv_export
 import tkinter as tk
-
-
+from CTkTable import *
+import help_contents
 
 
 class program_functions_component():
@@ -14,13 +14,76 @@ class program_functions_component():
         self.parent_folder = ""
         self.target_year = 0
         self.target_keyword = 0
+    
+
+    # loading process
+    @staticmethod
+    def loading_process(gui_instance):
+        gui_instance.loading_file_label
+
+        def process_file(index):
+            if index < len(lif_files_from_year):
+                lif_file_name = lif_files_from_year[index]
+                gui_instance.loading_file_label.configure(text=f"Processing {lif_file_name}")
+                lif_file_teams = gui_instance.program_functions.read_n_categorize_file(lif_file_name)
+                if isinstance(lif_file_teams, list):
+                    lif_files_contents_dir[lif_file_name] = lif_file_teams
+                else:
+                    # print(lif_file_teams)
+                    gui_instance.error("file error", lif_file_teams)
+                # Schedule the next file processing after 10 seconds
+                gui_instance.root.after(10, process_file, index + 1)
+            else:
+                # All files processed, proceed with further steps
+                regional_associations_results = gui_instance.program_functions.get_all_scores(lif_files_contents_dir)
+                regional_associations_results = gui_instance.program_functions.sort_descending(regional_associations_results)
+                # print(regional_associations_results)
+                gui_instance.success("Program Finished", message="All regional associations successfully scored")
+
+
+                # process finished
+                gui_instance.loading_progressbar.stop() # stops the animation
+
+                # export
+                gui_instance.regional_associations_results = regional_associations_results
+                    
+                gui_instance.results_screen()
         
 
-    def check_inputs_is_valid(self):
-        # print("parent folder",self.parent_folder)
-        # print("target year",self.target_year)
-        # print("keyword",self.target_keyword)
+        gui_instance.program_functions.target_year = gui_instance.year_input.get()
+        gui_instance.program_functions.parent_folder = gui_instance.parent_path
+        gui_instance.program_functions.target_keyword = gui_instance.keyword_input.get()
 
+        if gui_instance.program_functions.check_inputs_is_valid() == True:
+            target_year_files = gui_instance.program_functions.get_target_year_files()
+            if isinstance(target_year_files, list):
+                lif_files_from_year = gui_instance.program_functions.find_lif_files(target_year_files)
+                if isinstance(lif_files_from_year, list):
+                    lif_files_contents_dir = {}
+
+                    # Start processing the first file
+                    process_file(0)
+
+
+                else:
+                    # print(lif_files_from_year)
+                    gui_instance.error(title="lif files",message=lif_files_from_year)
+                    gui_instance.year_details_screen()
+            else:
+                # print(target_year_files)
+                gui_instance.error(title="year files", message=target_year_files)
+                gui_instance.year_details_screen()
+        else:
+            # print(self.program_functions.check_inputs_is_valid())
+            gui_instance.error(title="Invalid inputs", message=gui_instance.program_functions.check_inputs_is_valid())
+            gui_instance.year_details_screen()
+
+
+
+
+
+    # data validation
+    def check_inputs_is_valid(self):
 
         if self.check_parent_folder_is_valid() == True:
             if self.check_target_year_is_valid() == False:
@@ -30,8 +93,7 @@ class program_functions_component():
         else:
             return self.check_parent_folder_is_valid()
         
-
-        
+    # parent folder validation
     def check_parent_folder_is_valid(self):
         try:
             parent_folder_items = os.listdir(self.parent_folder)
@@ -51,12 +113,8 @@ class program_functions_component():
             return f"no items inside {self.parent_folder}"
 
 
-
+    # year input validation
     def check_target_year_is_valid(self):
-        # check if it is an int
-        
-
-        
         if self.target_year.isdigit():
             # get all available years
             all_available_years_folders = self.get_all_wakanats()
@@ -79,7 +137,10 @@ class program_functions_component():
 
 
 
-    # called internally only
+    
+
+
+    # fetching files
     def get_all_wakanats(self):
         
         parent_folder_items = os.listdir(self.parent_folder)
@@ -92,13 +153,6 @@ class program_functions_component():
 
         return wakanats_folders
         
-
-    
-    
-
-
-
-    
     def get_target_year_files(self):
         year_path = self.parent_folder + "/WakaNats" + self.target_year
         year_files = os.listdir(year_path)
@@ -109,7 +163,7 @@ class program_functions_component():
             return f"{self.target_year} have no files inside"
 
 
-
+    # data filtering
     def find_lif_files(self,year_files):
 
         lif_files = []
@@ -149,7 +203,7 @@ class program_functions_component():
             return f"No lif files are found in {self.target_year}"
     
         
-
+    # fetching and organizing
     def read_n_categorize_file(self,lif_file):
 
         lif_teams = []
@@ -218,7 +272,7 @@ class program_functions_component():
         return lif_teams
 
 
-
+    # Scoring
     def get_all_scores(self,lif_files_contents_dir):
         
         regional_association_scores = {}
@@ -260,10 +314,23 @@ class program_functions_component():
         
         return regional_association_scores
                 
-
+    # sorting
     def sort_descending(self,regional_association_results):
         regional_association_results = dict(sorted(regional_association_results.items(), key=lambda item: item[1], reverse=True))
         return regional_association_results
+    
+    
+    @staticmethod
+    def save_to_csv(gui_instance):
+        
+        csv_path = csv_export.export(gui_instance.regional_associations_results)
+
+        if  csv_path != False:
+            # print("Successful")
+            gui_instance.success("Saved successfully",message=f"CSV saved to {csv_path}")
+        else:
+            # print("Save to CSV error")
+            gui_instance.error("Save to CSV",message="Cannot save to CSV")
 
 
 
@@ -285,16 +352,57 @@ class program_functions_component():
 
 
 
+
+
+
+
+
+
+
+
+
+    # GUI component
 
 class gui_component():
-    def __init__(self):   
-        self.root = ct.CTk() # opens the customtkinter library
-        self.root.geometry("700x600") # widthxheight
-        
+    def __init__(self):
+
+        # window init
+        self.root = ct.CTk() 
+        self.root.geometry("700x600") 
+        self.root.iconbitmap("icon.ico")
+        self.root.title("Waka Ama Leaderboards system")
+
+        # Settings constants
+
 
         # Constants (default)
-        self.SCALE_CONSTANT = 1.5 # 1.5 is a suitable # scale constant for scaling the widget and the window
+
+        
+        
+        # widget settings
+        self.PLACEHOLDER_COLOR = "#696E77"
+        self.BORDER_WIDTH =2
+        self.BORDER_COLOR = "#2A2C30"
+        self.CORNDER_RADIUS = 5
+        self.BACKGROUND_COLOR = "#111113"
+
+        # screen widgets constants
+        self.INPUT_GROUP_PADDING = 20
+        
+
+        # window settings
+        self.SCALE_CONSTANT = 1.5 
+        self.COLOR_THEME = "blue"
+        self.SHOW_ERROR = False
+        self.APPEARANCE_MODE = "dark"
+
+
+        # fonts
         self.FONT_BASE_CONSTANT = 50  # also increases the fonts size relative to the scale constant
+        self.title_font = ct.CTkFont(size=int((self.FONT_BASE_CONSTANT / self.SCALE_CONSTANT) * self.SCALE_CONSTANT),weight="bold") # Creates a bold and big font for the title
+        self.heading_font = ct.CTkFont(size=int(self.FONT_BASE_CONSTANT / self.SCALE_CONSTANT) - self.FONT_BASE_CONSTANT,weight="bold") # Creates a bold and big font for the title
+
+        # scoring 
         self.POINTS_REFFERENCE = {
                 "1":8,
                 "2":7,
@@ -306,32 +414,13 @@ class gui_component():
                 "8":1,
                 ">":1,
                 }
-        # widget colors
-        self.PLACEHOLDER_COLOR = "#696E77"
-        self.BORDER_WIDTH =2
-        self.CORNER_COLOR = "#2A2C30"
-        self.CORNDER_RADIUS = 5
-        self.BACKGROUND_COLOR = "#111113"
-
-        self.COLOR_THEME = "blue"
-        self.SHOW_ERROR = True
-        self.SAVE_TO_CSV = True
-        self.APPEARANCE_MODE = "dark"
-
-        # Parse settings
 
 
 
 
 
 
-
-
-
-
-
-        # fonts
-        self.title_font = ct.CTkFont(size=int(self.FONT_BASE_CONSTANT / self.SCALE_CONSTANT * self.SCALE_CONSTANT),weight="bold") # Creates a bold and big font for the title
+        # setting class variables
 
         # window scaling
         ct.set_window_scaling(self.SCALE_CONSTANT * 0.4)  # Increase the widget size by scale constant
@@ -347,11 +436,42 @@ class gui_component():
         self.root.columnconfigure(0,weight=1) # maximize the root window to only 1 column
         
 
+        # Screen variables initialization
+
         # Homepage Variables
-        self.processed_year_files = "" # variable if for all the year files count
-        self.processed_year_filtered_files = "" # variable for all the final processed year files count
-        self.current_loading_file = "" # current file being processed
-        self.parent_path = "" # for the folder path
+        self.processed_year_files = ""
+        self.processed_year_filtered_files = ""
+        self.current_loading_file = ""
+        self.parent_path = "" 
+        self.regional_associations_results = {}
+        
+        # reusable widget kwargs
+        # Button
+        self.SOLID_BUTTON_KWARGS = {"fg_color":"#3e63dd"}
+        self.OUTLINE_BUTTON_KWARGS = {"fg_color":"transparent","border_color":"#4468de","border_width":0.3,"text_color":"#96a8f1"}
+        
+        # Frames
+        self.MAIN_SCREEN_FRAME_KWARGS = {"master":self.root,"fg_color":self.BACKGROUND_COLOR}
+        self.MATCH_PARENT_KWARGS = {"row":0, "column":0,"sticky":"nsew"}
+        self.SOLID_FRAME_KWARGS = {"fg_color":"#18191B","border_width":self.BORDER_WIDTH,"border_color":self.BORDER_COLOR,"corner_radius":self.CORNDER_RADIUS}
+        self.NAV_BAR_FRAME_KWARGS = {"corner_radius":self.CORNDER_RADIUS,"border_color":self.BORDER_COLOR,"border_width":self.BORDER_WIDTH,"fg_color":self.BACKGROUND_COLOR}
+        
+        # nav bar buttons
+        self.NAV_BUTTON_SELECTED = {"width":70,"fg_color":"white","text_color":"black"}
+        self.NAV_BUTTON_UNSELECTED = {"width":70,"fg_color":"transparent","text_color":"white"}
+        self.NAV_BAR_PADDING = {"pady":2,"padx":1}
+        # input 
+        self.INPUT_KWARGS = {"placeholder_text_color":self.PLACEHOLDER_COLOR,"fg_color":"transparent","border_color":self.BORDER_COLOR,"border_width":self.BORDER_WIDTH,"corner_radius":self.CORNDER_RADIUS,}
+        
+        # table
+        self.TABLE_KWARGS = {"border_width":self.BORDER_WIDTH,
+                             "border_color":self.BORDER_COLOR,
+                             "corner_radius":self.CORNDER_RADIUS,
+                             "header_color":"#1F2123",
+                             "colors":[self.BACKGROUND_COLOR,self.BACKGROUND_COLOR]}
+
+
+
 
         # program functions instance
         self.program_functions  = program_functions_component()
@@ -360,50 +480,42 @@ class gui_component():
         self.home_screen() # starts the homepage function
 
 
-    
+        
+
+        
+
+
+    # screens
     def home_screen(self):
         self.remove_current_screen()
 
         # Creates homepage frame
-        homepage_frame = ct.CTkFrame(self.root,fg_color=self.BACKGROUND_COLOR) # creates the homepage frame
-        homepage_frame.grid(row=0,column=0,sticky="NSEW") # displays the homepage frame to the maximizes root window specified earlier
-
-        # configure 2 rows
-        # -- nav frame
+        homepage_frame = ct.CTkFrame(**self.MAIN_SCREEN_FRAME_KWARGS) 
+        homepage_frame.grid(row=0,column=0,sticky="NSEW") 
         homepage_frame.rowconfigure(0,weight=0) 
-        # -- body
         homepage_frame.rowconfigure(1,weight=1) 
-
-        # -- maximizes the col 
         homepage_frame.columnconfigure(0,weight=1) 
 
-
         # nav bar frame
-        nav_bar_frame = ct.CTkFrame(homepage_frame,corner_radius=self.CORNDER_RADIUS,border_color=self.CORNER_COLOR,border_width=self.BORDER_WIDTH,fg_color=self.BACKGROUND_COLOR,height=20)
+        nav_bar_frame = ct.CTkFrame(homepage_frame,height=20,**self.NAV_BAR_FRAME_KWARGS)
         nav_bar_frame.grid(row=0, column=0,padx=20,pady=20)
-
-        # for the settings button
-        nav_bar_frame.columnconfigure(0,weight=1)
-        # for the logs button
-        nav_bar_frame.columnconfigure(1,weight=1)
-        # for the Help button
-        nav_bar_frame.columnconfigure(2,weight=1)
-
-        # max the row
+        nav_bar_frame.columnconfigure(0,weight=0)
+        nav_bar_frame.columnconfigure(1,weight=0)
+        nav_bar_frame.columnconfigure(2,weight=0)
         nav_bar_frame.rowconfigure(0,weight=0)
     
-        # Settings button
-        settings_button = ct.CTkButton(nav_bar_frame,text="Settings",width=0,command=self.help_screen,fg_color="transparent") # maximize the button width to the text
-        settings_button.grid(row=0,column=0,padx=10,pady=2) # displaces the help button on the 'north east'
+        
+        # Home button
+        home_button = ct.CTkButton(nav_bar_frame,text="Home",**self.NAV_BUTTON_SELECTED) # maximize the button width to the text
+        home_button.grid(row=0,column=0,**self.NAV_BAR_PADDING) # displaces the help button on the 'north east'
 
-        # Logs button
-        logs_button = ct.CTkButton(nav_bar_frame,text="Logs",width=0,command=self.help_screen,fg_color="transparent") # maximize the button width to the text
-        logs_button.grid(row=0,column=1,pady=2) # displaces the help button on the 'north east'
+        # Settings button
+        settings_button = ct.CTkButton(nav_bar_frame,text="Settings",**self.NAV_BUTTON_UNSELECTED) # maximize the button width to the text
+        settings_button.grid(row=0,column=1,**self.NAV_BAR_PADDING) # displaces the help button on the 'north east'
 
         # Help button
-        help_button = ct.CTkButton(nav_bar_frame,text="Help",width=0,command=self.help_screen,fg_color="transparent") # maximize the button width to the text
-        help_button.grid(row=0,column=2,padx=10,pady=2) # displaces the help button on the 'north east'
-
+        help_button = ct.CTkButton(nav_bar_frame,text="Help",command=self.help_screen,**self.NAV_BUTTON_UNSELECTED) # maximize the button width to the text
+        help_button.grid(row=0,column=2,**self.NAV_BAR_PADDING) # displaces the help button on the 'north east'
 
 
 
@@ -411,69 +523,84 @@ class gui_component():
         # Body frame
         body_frame = ct.CTkFrame(homepage_frame, fg_color="transparent")
         body_frame.grid(row=1, column=0,sticky="nsew")
-
         body_frame.rowconfigure(0,weight=1)
         body_frame.columnconfigure(0,weight=1)
 
         # inner frame
-        
-        # inner frame
         inner_frame = ct.CTkFrame(body_frame,fg_color=self.BACKGROUND_COLOR) # Creates the inner frame for the input boxes, etc.
-        inner_frame.grid(row=0,column=0) # maximizes it again
-
-
-        # configure the inner frame: 2 rows 2 cols
-        inner_frame.rowconfigure(0,weight=3) # all equal
-        inner_frame.rowconfigure(1,weight=1) # all equal
+        inner_frame.grid(row=0,column=0,sticky="n") 
+        inner_frame.rowconfigure(0,weight=2) 
+        inner_frame.rowconfigure(1,weight=1) 
+        inner_frame.columnconfigure(0,weight=1) 
         
-        inner_frame.columnconfigure(0,weight=1) # column equal
-        inner_frame.columnconfigure(1,weight=1) # column equal
-        
+        # title_group
+        title_group = ct.CTkFrame(inner_frame,fg_color="transparent")
+        title_group.grid(row=0,column=0,padx=50,pady=50,sticky="nsew")
+        title_group.rowconfigure(0,weight=1)
+        title_group.rowconfigure(0,weight=1)
+        title_group.columnconfigure(0,weight=1)
 
         # title 
-        title_label = ct.CTkLabel(inner_frame,text="Waka Ama leaderboard system",font=self.title_font) # Creates the title with its text
-        title_label.grid(columnspan=2,row=0,column=0,padx=50,pady=50,sticky="nsew") # maximize the display on the its row with using sticky arguement and value "north south east west" 
+        title_label = ct.CTkLabel(title_group,text="Waka Ama leaderboard system",font=self.title_font) 
+        title_label.grid() 
         
-        # open folder
-        self.input_parent = ct.CTkEntry(inner_frame,
-                                        placeholder_text_color=self.PLACEHOLDER_COLOR,
-                                        fg_color="transparent",
-                                        border_color=self.CORNER_COLOR,
-                                        border_width=self.BORDER_WIDTH,
-                                        corner_radius=self.CORNDER_RADIUS,
-                                        width=300,
-                                        placeholder_text="Type your parent folder locations") # Creates a button to open folder
+        # subtitle group
+        subtitle_label = ct.CTkLabel(title_group,text="A program that scores your Waka Ama National results and saves to CSV",font=self.heading_font) 
+        subtitle_label.grid() 
+
+        # input group
+        input_group = ct.CTkFrame(inner_frame,**self.SOLID_FRAME_KWARGS)
+        input_group.grid(row=1,column=0,pady=40)
+        input_group.rowconfigure(0,weight=1)
+        input_group.columnconfigure(0,weight=1)
+        input_group.columnconfigure(1,weight=1)
+        input_group.columnconfigure(2,weight=1)
+
+
+        # input parent path
+        self.input_parent = ct.CTkEntry(input_group,**self.INPUT_KWARGS,width=300,placeholder_text="Type your parent folder's location") 
+        self.input_parent.grid(row=0,column=0,sticky="e",pady=self.INPUT_GROUP_PADDING,padx=(self.INPUT_GROUP_PADDING,0)) # displays the open folder
         
-        self.input_parent.grid(row=1,column=0,sticky="e") # displays the open folder
+        # open folder button
+        self.parent_folder_button = ct.CTkButton(input_group,text="Open folder",command=self.pick_folder,width=50,**self.OUTLINE_BUTTON_KWARGS) # Creates a button to open folder
+        self.parent_folder_button.grid(row=0,column=1,sticky="w",padx=10,pady=self.INPUT_GROUP_PADDING) # displays the open folder
+        
+        # Next button
+        self.parent_folder_button = ct.CTkButton(input_group,text="Next",command=self.parent_path_submit,width=50,**self.SOLID_BUTTON_KWARGS) # Creates a button to open folder
+        self.parent_folder_button.grid(row=0,column=2,sticky="w",padx=(10,self.INPUT_GROUP_PADDING),pady=self.INPUT_GROUP_PADDING) # displays the open folder
         
 
-        # open folder
-        self.parent_folder_button = ct.CTkButton(inner_frame,text="Open folder",command=self.pick_folder,width=50) # Creates a button to open folder
-        self.parent_folder_button.grid(row=1,column=1,sticky="w",padx=10) # displays the open folder
-        
+
+
+
+
+
+
+
+
+
     def year_details_screen(self):
 
         self.remove_current_screen()
-        year_details_frame = ct.CTkFrame(self.root)
-        year_details_frame.grid()
 
+        year_details_frame = ct.CTkFrame(self.root,fg_color=self.BACKGROUND_COLOR)
+        year_details_frame.grid(sticky="nsew")
         
         # configure
         year_details_frame.rowconfigure(0,weight=0)
         year_details_frame.rowconfigure(1,weight=1)
-
         year_details_frame.columnconfigure(0,weight=1)
         
         # nav bar frame
         nav_bar_frame = ct.CTkFrame(year_details_frame,fg_color="transparent")
-        nav_bar_frame.grid(row=1, column=0)
+        nav_bar_frame.grid(row=0, column=0,sticky="nsew")
 
         # Back button
-        back_button = ct.CTkButton(nav_bar_frame)
-        back_button.grid(sticky="w",padx=30,pady=30)
+        back_button = ct.CTkButton(nav_bar_frame,text="Back",width=0,**self.OUTLINE_BUTTON_KWARGS,command=self.home_screen)
+        back_button.grid(sticky="w",padx=10,pady=10)
 
         # body frame
-        body_frame = ct.CTkFrame(year_details_frame)
+        body_frame = ct.CTkFrame(year_details_frame,fg_color="#18191B",border_width=self.BORDER_WIDTH,border_color=self.BORDER_COLOR,corner_radius=self.CORNDER_RADIUS)
         body_frame.grid(row=1,column=0)
 
         # configure
@@ -484,171 +611,244 @@ class gui_component():
         body_frame.rowconfigure(4,weight=0)
         body_frame.rowconfigure(5,weight=0)
 
-        # keyword input
-        self.keyword_input = ct.CTkEntry(body_frame,placeholder_text="Type keyword") # Creates an input box for the keyword
-        self.keyword_input.grid(row=1,column=0) # displays the keyword input box
-        self.processed_keyword = self.keyword_input.get()
+        # heading
+        heading_label = ct.CTkLabel(body_frame,text="Input Details",font=self.heading_font)
+        heading_label.grid(row=0,column=0,padx=30,pady=(30,10),sticky="w")
+
+        # year label
+        year_label = ct.CTkLabel(body_frame,text="Year")
+        year_label.grid(row=1,column=0,sticky="w",padx=30)
 
         # year input
-        self.year_input = ct.CTkEntry(body_frame,placeholder_text="Type year") # Creates the year input box
-        self.year_input.grid(row=2,column=0) # displays the year input box
+        self.year_input = ct.CTkEntry(body_frame,placeholder_text="Type year",placeholder_text_color=self.PLACEHOLDER_COLOR,border_width=self.BORDER_WIDTH,corner_radius=self.CORNDER_RADIUS,border_color=self.BORDER_COLOR,fg_color=self.BACKGROUND_COLOR) # Creates the year input box
+        self.year_input.grid(row=2,column=0,padx=30,pady=(0,10),sticky="nsew") # displays the year input box
         self.processed_year = self.year_input.get()
 
-        # save to csv
-        self.save_to_csv_var = tk.BooleanVar(value=self.SAVE_TO_CSV)
-        self.save_to_csv_switch = ct.CTkSwitch(body_frame,text="Save to CSV",variable=self.save_to_csv_var) # Creates save to CSV switch
-        self.save_to_csv_switch.grid(row=1,column=1) # displays save to csv switch
+        # keyword label
+        keyword_label = ct.CTkLabel(body_frame,text="keyword")
+        keyword_label.grid(row=3,column=0,padx=30,sticky="w")
+
+        # keyword input
+        self.keyword_input = ct.CTkEntry(body_frame,placeholder_text="Type keyword",placeholder_text_color=self.PLACEHOLDER_COLOR,border_width=self.BORDER_WIDTH,corner_radius=self.CORNDER_RADIUS,border_color=self.BORDER_COLOR,fg_color=self.BACKGROUND_COLOR) # Creates an input box for the keyword
+        self.keyword_input.grid(row=4,column=0,padx=30,sticky="nsew") # displays the keyword input box
+        self.processed_keyword = self.keyword_input.get()
+
+        # table
+        value = [["Year","File/s"]]
+        
+
+         # [2020,300],[2021,300]
+
+        table = CTkTable(body_frame, row=1, column=2, values=value,width=50,**self.TABLE_KWARGS)
+        table.grid(row=1,column=1,rowspan=4,padx=30)
+        
+        available_years = self.program_functions.get_all_wakanats()
+        
+        for item in available_years:
+            table.add_row([item[-4:],300])
+
 
         # proceed
-        proceed_button = ct.CTkButton(body_frame,text="Proceed",command=self.loading_screen) # Creates the proceed button
-        proceed_button.grid(row=2,column=1) #displays the proceed button
+        proceed_button = ct.CTkButton(body_frame,text="Proceed",command=self.loading_screen,width=30,**self.SOLID_BUTTON_KWARGS) # Creates the proceed button
+        proceed_button.grid(row=5,column=1,padx=30,pady=20,sticky="e") #displays the proceed button
         
-
-
+    
     def loading_screen(self):
-        
         self.remove_current_screen()
 
         # create the frame
-        loading_frame = ct.CTkFrame(self.root) # creates the loading frame
-        loading_frame.grid() # Displays the loading frame
+        loading_frame = ct.CTkFrame(**self.MAIN_SCREEN_FRAME_KWARGS) # creates the loading frame
+        loading_frame.grid(**self.MATCH_PARENT_KWARGS) # Displays the loading frame
+        loading_frame.rowconfigure(0,weight=1)
+        loading_frame.columnconfigure(0,weight=1)
+
+
+        # inner frame
+        inner_frame = ct.CTkFrame(loading_frame,fg_color="transparent")
+        inner_frame.grid()
 
         # create the title
-        loading_title_label = ct.CTkLabel(loading_frame, text=f"Loading {self.year_input.get()} {self.keyword_input.get()}") # creates the loading title
+        loading_title_label = ct.CTkLabel(inner_frame, text=f"Loading {self.year_input.get()} {self.keyword_input.get()}",font=self.heading_font) # creates the loading title
         loading_title_label.grid() # displays the loading title message
 
         # create the current file loading
-        self.loading_file_label = ct.CTkLabel(loading_frame, text=f"Processing {self.current_loading_file}") # creates the loading text message
+        self.loading_file_label = ct.CTkLabel(inner_frame, text=f"Processing {self.current_loading_file}") # creates the loading text message
         self.loading_file_label.grid() # displays the loading text message
 
         # add the loading 
-        self.loading_progressbar = ct.CTkProgressBar(loading_frame) # Creates a loading bar
+        self.loading_progressbar = ct.CTkProgressBar(inner_frame) # Creates a loading bar
         self.loading_progressbar.grid() # displays the loading bar
         self.loading_progressbar.start() # starts the loading bar animation
         
         # loading process
-        self.loading_process() # starts the loading process
+        self.program_functions.loading_process(self)
+
+    def results_screen(self):
+        print("results")
+        self.remove_current_screen()
+
+        results_screen_frame = ct.CTkFrame(self.root,fg_color=self.BACKGROUND_COLOR)
+        results_screen_frame.grid(sticky="nsew")
 
         
+        # configure
+        results_screen_frame.rowconfigure(0,weight=0)
+        results_screen_frame.rowconfigure(1,weight=1)
+
+        results_screen_frame.columnconfigure(0,weight=1)
+        
+        # nav bar frame
+        nav_bar_frame = ct.CTkFrame(results_screen_frame,fg_color="transparent")
+        nav_bar_frame.grid(row=0, column=0,sticky="nsew")
+
+        # Back button
+        back_button = ct.CTkButton(nav_bar_frame,text="Back",width=0,command=self.home_screen,**self.OUTLINE_BUTTON_KWARGS)
+        back_button.grid(sticky="w",padx=10,pady=10)
+
+        # body frame
+        body_frame = ct.CTkFrame(results_screen_frame,fg_color=self.BACKGROUND_COLOR)
+        body_frame.grid(row=1,column=0,sticky="nsew")
+
+        # maximize
+        body_frame.rowconfigure(0,weight=1)
+        body_frame.columnconfigure(0,weight=1)
+
+        # create inner frame
+        inner_frame = ct.CTkFrame(body_frame,fg_color=self.BACKGROUND_COLOR)
+        inner_frame.grid(row=0,column=0)
+
+        inner_frame.rowconfigure(0,weight=1)
+        inner_frame.rowconfigure(1,weight=1)
+        inner_frame.rowconfigure(2,weight=0)
+        inner_frame.rowconfigure(3,weight=1)
+
+        inner_frame.columnconfigure(0,weight=1)
+        
+        # heading
+        heading_label = ct.CTkLabel(inner_frame,text="Regional Association Results",font=self.title_font)
+        heading_label.grid(row=0,column=0,padx=30,pady=(30,0))
+
+        # heading
+        subheading_label = ct.CTkLabel(inner_frame,text=f"This is the regional association results of {self.year_input.get()} {self.keyword_input.get()}")
+        subheading_label.grid(row=1,column=0,pady=(0,30))
+        
+        # table
+        value = [["Place","Regional Association","Points"],
+         [1,"Regional Assoc 1",111],
+         [1,"Regional Assoc 2",111],]
+
+         
+
+        table_frame = ct.CTkScrollableFrame(inner_frame,height=100,width=300,fg_color=self.BACKGROUND_COLOR)
+        table_frame.grid(row=2,column=0,padx=30)
+        
+
+        table = CTkTable(table_frame,width=190, row=70, column=3, values=value,**self.TABLE_KWARGS)
+        table.grid(sticky="nsew")
+        table.edit_column(0,width=10)
+        table.edit_column(2,width=10)
+        
+        for index, item in enumerate():
+            pass
+
+        # save to CSV
+        save_to_csv = ct.CTkButton(inner_frame,text="Save to CSV",command=lambda: self.program_functions.save_to_csv(self),width=30,**self.SOLID_BUTTON_KWARGS) # Creates the proceed button
+        save_to_csv.grid(row=3,column=0,padx=30,pady=20,sticky="e") #displays the proceed button
+
+
+    def settings_screen(self):
+        pass
+    
 
     def help_screen(self):
         self.remove_current_screen()
 
-        help_frame = ct.CTkFrame(self.root)
-        help_frame.grid(row=0,column=0,sticky="nsew")
+        # Creates help frame
+        help_screen_frame = ct.CTkFrame(**self.MAIN_SCREEN_FRAME_KWARGS) 
+        help_screen_frame.grid(row=0,column=0,sticky="NSEW") 
+        help_screen_frame.rowconfigure(0,weight=0) 
+        help_screen_frame.rowconfigure(1,weight=1) 
+        help_screen_frame.columnconfigure(0,weight=1) 
 
-        home_button = ct.CTkButton(help_frame,text="Back",command=self.home_screen)
-        home_button.grid()
+        # nav bar frame
+        nav_bar_frame = ct.CTkFrame(help_screen_frame,height=20,**self.NAV_BAR_FRAME_KWARGS)
+        nav_bar_frame.grid(row=0, column=0,padx=20,pady=20)
+        nav_bar_frame.columnconfigure(0,weight=0)
+        nav_bar_frame.columnconfigure(1,weight=0)
+        nav_bar_frame.columnconfigure(2,weight=0)
+        nav_bar_frame.rowconfigure(0,weight=0)
+    
+        # Home button
+        home_button = ct.CTkButton(nav_bar_frame,text="Home",command=self.home_screen,**self.NAV_BUTTON_UNSELECTED) # maximize the button width to the text
+        home_button.grid(row=0,column=0,**self.NAV_BAR_PADDING) # displaces the help button on the 'north east'
 
-        help_statement = ct.CTkLabel(help_frame,text="this is a help statement")
-        help_statement.grid()
+        # Settings button
+        settings_button = ct.CTkButton(nav_bar_frame,text="Settings",**self.NAV_BUTTON_UNSELECTED) # maximize the button width to the text
+        settings_button.grid(row=0,column=1,**self.NAV_BAR_PADDING) # displaces the help button on the 'north east'
+
+        # Help button
+        help_button = ct.CTkButton(nav_bar_frame,text="Help",**self.NAV_BUTTON_SELECTED) # maximize the button width to the text
+        help_button.grid(row=0,column=2,**self.NAV_BAR_PADDING) # displaces the help button on the 'north east'
 
 
+
+        # body frame
+        body_frame = ct.CTkScrollableFrame(help_screen_frame,**self.SOLID_FRAME_KWARGS)
+        body_frame.grid(row=1,column=0,sticky="nsew",padx=200,pady=50)
+        body_frame.rowconfigure(0,weight=1)
+        body_frame.columnconfigure(0,weight=1)
+
+        # body frame
+        inner_frame = ct.CTkFrame(body_frame,fg_color="transparent")
+        inner_frame.grid(row=1,column=0,sticky="nsew",padx=100,pady=50)
+
+
+        help_contents.fetch(inner_frame,self)
+
+
+        
+
+    
+    # alerts
     def error(self,title,message):
         messagebox.showerror(title=title,message=message)
 
     def success(self,title,message):
         messagebox.showinfo(title=title,message=message)
-    
-    
-    def loading_process(self):
-        def process_file(index):
-            if index < len(lif_files_from_year):
-                lif_file_name = lif_files_from_year[index]
-                self.loading_file_label.configure(text=f"Processing {lif_file_name}")
-                lif_file_teams = self.program_functions.read_n_categorize_file(lif_file_name)
-                if isinstance(lif_file_teams, list):
-                    lif_files_contents_dir[lif_file_name] = lif_file_teams
-                else:
-                    # print(lif_file_teams)
-                    self.error("file error", lif_file_teams)
-                # Schedule the next file processing after 10 seconds
-                self.root.after(10, process_file, index + 1)
-            else:
-                # All files processed, proceed with further steps
-                regional_associations_results = self.program_functions.get_all_scores(lif_files_contents_dir)
-                regional_associations_results = self.program_functions.sort_descending(regional_associations_results)
-                # print(regional_associations_results)
-                self.success("Program Finished", message="All regional associations successfully scored")
 
 
-                # process finished
-                self.loading_progressbar.stop() # stops the animation
-                
-                if self.save_to_csv_switch.get() == 1:
-                    
-                    csv_path = csv_export.export(regional_associations_results)
 
-                    if  csv_path != False:
-                        # print("Successful")
-                        self.success("Saved successfully",message=f"CSV saved to {csv_path}")
-                    else:
-                        # print("Save to CSV error")
-                        self.error("Save to CSV",message="Cannot save to CSV")
-                    
-
-                self.home_screen()
-        
-
-        self.program_functions.target_year = self.year_input.get()
-        self.program_functions.parent_folder = self.parent_path
-        self.program_functions.target_keyword = self.keyword_input.get()
-
-        if self.program_functions.check_inputs_is_valid() == True:
-            target_year_files = self.program_functions.get_target_year_files()
-            if isinstance(target_year_files, list):
-                lif_files_from_year = self.program_functions.find_lif_files(target_year_files)
-                if isinstance(lif_files_from_year, list):
-                    lif_files_contents_dir = {}
-
-                    # Start processing the first file
-                    process_file(0)
-
-
-                else:
-                    # print(lif_files_from_year)
-                    self.error(title="lif files",message=lif_files_from_year)
-                    self.home_screen()
-            else:
-                # print(target_year_files)
-                self.error(title="year files", message=target_year_files)
-                self.home_screen()
+    # screen utility functions
+    def parent_path_submit(self):
+        self.parent_path = self.input_parent.get()
+        self.program_functions.parent_folder = self.input_parent.get()
+        check_parent_folder = self.program_functions.check_parent_folder_is_valid()
+        print(self.input_parent.get())
+        if check_parent_folder == True:
+            self.year_details_screen()
         else:
-            # print(self.program_functions.check_inputs_is_valid())
-            self.error(title="Invalid inputs", message=self.program_functions.check_inputs_is_valid())
-            self.home_screen()
-
-
-    
-
-
-
-        
-
-
+            self.error("Incorrect Folder",check_parent_folder)
 
     def pick_folder(self):
         folder_path = filedialog.askdirectory()  # Open a folder selection dialog
         if folder_path: # checks if folder exists
-                self.parent_path = folder_path
-                self.year_details_screen()
+                self.input_parent.delete(0,tk.END)
+                self.input_parent.insert(0,folder_path)
         else: # if folder is not found
             self.error(title="folder error",message="pick a folder") # open error dialog. Folder error and the messaeg "Cannot open folder"
     
-    
+
     def remove_current_screen(self): # creates a function for removing the current screen
-        
+    
         # removes the current frame
         if self.root.winfo_children(): # checks if there is widgets in the screen
             for widget in self.root.winfo_children(): # loops every widget
                 if isinstance(widget, ct.CTkFrame): # finds only the frames
                     widget.grid_remove() # hides the frame
 
+    # window loop
     def run(self):
         self.root.mainloop() # display the whole GUI
-    
-
-
 
 # starts program
 gui = gui_component() # creates the gui component
