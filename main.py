@@ -502,10 +502,6 @@ class GuiComponent():
         self.program_functions  = ProgramFunctionsComponent()
         self.settings_dict = self.program_functions.settings_fetch(self)
 
-        # Settings constants
-        
-
-
         # Constants (default)
 
         # widget settings
