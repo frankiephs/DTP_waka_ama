@@ -7,6 +7,7 @@ import tkinter as tk
 from CTkTable import *
 import help_contents
 import json
+import sys
 
 class ProgramFunctionsComponent():
     """
@@ -449,7 +450,11 @@ class ProgramFunctionsComponent():
             try:
                 with open('program.settings', 'w') as file:
                     json.dump(settings_dict, file, indent=4)
-                gui_instance.success('Saved','successfully saved. Program restart required')
+                try:
+                    gui_instance.success('Saved','successfully saved.')
+                    os.execv(sys.executable, ['python'] + sys.argv)
+                except:
+                    gui_instance.success('Saved','successfully saved. Program restart required')
             except:
                 gui_instance.error('Settings error','Cant save the changes') 
         except:
@@ -1083,8 +1088,12 @@ class GuiComponent():
         """
         self.root.mainloop() # display the whole GUI
 
+
+
 def main():
     gui = GuiComponent() # creates the gui component
     gui.run() # calls the display function
 
-main()
+if __name__ == "__main__":
+    main()
+
