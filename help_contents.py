@@ -83,7 +83,7 @@ not read those folders. Try to rename your folders to "WakaNats(year)".
 e.g. WakaNats 2020
 
 "Error on CSV Export"
-• Make sure your
+• Make sure you typed a valid filename. Try avoiding symbols
 
 "Wrong results"
 • Make sure you set up your settings value right because the program
@@ -92,6 +92,19 @@ will always stick from the settings provided
 "There are no files of the keyword (Keyword specified)"
 • by default, The filter keyword input field is CASE SENSITIVE. Always look
 for spelling mistakes.
+
+"I do not understand the scoring criteria on the settings"
+• The scoring criteria looks like this "{"place":score, ">":1}" 
+Place is surrounded with double quotes, scores are not. it should be 
+something like this "1":8. Means 1st place will get 8 points. 
+To create many places, you separate it with comma. ">" (Greater than oper-
+ator) means that the last place specified e.g. 8th place: 1 pt. Anything
+above the last highest number, in this example "8" will recieve the point.
+e.g 1 pt for >8th place (greater than 8th place). Make sure that the place
+is in descending order and should not have duplicates, the program
+will still accept this but will give you wrong results.
+
+
 """
 
 
@@ -125,3 +138,9 @@ def fetch(frame,fonts):
 
     par3 = ct.CTkLabel(frame,text=p3,justify="left")
     par3.grid()
+
+    heading4 = ct.CTkLabel(frame,text=h4,justify="center",font=fonts.heading_font)
+    heading4.grid()
+
+    par4 = ct.CTkLabel(frame,text=p4,justify="left")
+    par4.grid()

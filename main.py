@@ -361,10 +361,17 @@ class ProgramFunctionsComponent:
                 last_num = int(list(points_refference.keys())[-2])
                 morethan_point = list(points_refference.values())[-1]
 
-                if int(team_place) > last_num:
-                    team_score = morethan_point
-                else:
-                    team_score = points_refference[team_place]
+                try:
+                    if int(team_place) > last_num:
+                        team_score = morethan_point
+                    else:
+                        team_score = points_refference[team_place]
+                except:
+                    
+                    
+                    gui_instance.error("Scoring criteria error", "Please change the scoring criteria to default")
+                    gui_instance.home_screen()
+                    return
 
                 # add to the dictionary
                 if team_regional_association in regional_association_scores:
