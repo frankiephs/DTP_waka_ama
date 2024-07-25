@@ -498,6 +498,7 @@ class GuiComponent():
         self.root.iconbitmap('icon.ico')
         self.root.title('Waka Ama Leaderboards system')
 
+
         # program functions instance
         self.program_functions  = ProgramFunctionsComponent()
         self.settings_dict = self.program_functions.settings_fetch(self)
@@ -515,7 +516,7 @@ class GuiComponent():
         self.INPUT_GROUP_PADDING = 20
         
         # window settings
-        self.SCALE_CONSTANT = 1.5  # 1.5
+        self.SCALE_CONSTANT = 1.5 
         self.COLOR_THEME = 'blue'
         self.SHOW_ERROR = self.settings_dict['SHOW_ERRORS_SETTINGS']
         self.SHOW_DQ = self.settings_dict['DQ_SETTINGS']
@@ -584,7 +585,6 @@ class GuiComponent():
 
         
         
-
         # starts homepage
         self.home_screen() # starts the homepage function
 
@@ -1005,13 +1005,13 @@ class GuiComponent():
 
         # body frame
         body_frame = ct.CTkScrollableFrame(help_screen_frame,**self.SOLID_FRAME_KWARGS)
-        body_frame.grid(row=1,column=0,sticky='nsew',padx=200,pady=50)
+        body_frame.grid(row=1,column=0,sticky='nsew',padx=100,pady=50)
         body_frame.rowconfigure(0,weight=1)
         body_frame.columnconfigure(0,weight=1)
 
         # inner frame
         inner_frame = ct.CTkFrame(body_frame,fg_color='transparent')
-        inner_frame.grid(row=0,column=0,sticky='nsew',padx=100,pady=50)
+        inner_frame.grid(row=0,column=0,padx=100,pady=50)
 
 
         help_contents.fetch(inner_frame,self)
