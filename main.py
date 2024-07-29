@@ -96,6 +96,11 @@ class ProgramFunctionsComponent:
                 if isinstance(lif_files_from_year, list):
                     lif_files_contents_dir = {}
 
+
+                    # starts to update the number of year files in the loading screen
+                    gui_instance.processed_year_files = len(lif_files_from_year)
+                    gui_instance.loading_title_label.configure(text=f"Loading {gui_instance.processed_year_files} files ( {gui_instance.year_input.get()} {f"{gui_instance.keyword_input.get()} "})")
+
                     # Start processing the first file
                     process_file(0)
 
@@ -856,7 +861,7 @@ class GuiComponent:
         # year input
         self.year_input = ct.CTkEntry(
             body_frame,
-            placeholder_text="Type year",
+            placeholder_text="e.g. 2017",
             placeholder_text_color=self.PLACEHOLDER_COLOR,
             border_width=self.BORDER_WIDTH,
             corner_radius=self.CORNDER_RADIUS,
@@ -875,7 +880,7 @@ class GuiComponent:
         # keyword input
         self.keyword_input = ct.CTkEntry(
             body_frame,
-            placeholder_text="Type keyword",
+            placeholder_text="e.g. Final",
             placeholder_text_color=self.PLACEHOLDER_COLOR,
             border_width=self.BORDER_WIDTH,
             corner_radius=self.CORNDER_RADIUS,
@@ -934,12 +939,12 @@ class GuiComponent:
         inner_frame.grid()
 
         # create the title
-        loading_title_label = ct.CTkLabel(
+        self.loading_title_label = ct.CTkLabel(
             inner_frame,
-            text=f"Loading {self.year_input.get()} {self.keyword_input.get()}",
+            text=f"Loading started",
             font=self.heading_font,
         )  # creates the loading title
-        loading_title_label.grid()  # displays the loading title message
+        self.loading_title_label.grid()  # displays the loading title message
 
         # create the current file loading
         self.loading_file_label = ct.CTkLabel(
