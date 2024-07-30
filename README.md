@@ -45,6 +45,10 @@ install the dependencies/requirements
 ```
   pip install -r requirements.txt
 ```
+open the directory
+```
+cd DTP_waka_ama
+```
 run the program
 ```
 python main.py
