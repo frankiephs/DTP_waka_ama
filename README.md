@@ -13,16 +13,26 @@ A graphical User Interface program programmed in python that read and scores .li
 
 ## Screenshots
 
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
+![Homescreen](HomeScreen.png)
+![Help screen](helpscreen.png)
+![Loading Screen](LoadingScreen.png)
+![Results Screen](ResultsScreen.png)
+![Select Year Screen](selectYearScreen.png)
+![Settings screen](Settings.png)
 
 
 ## Features
 
-- Light/dark mode toggle
-- Live previews
-- Fullscreen mode
-- Cross platform
-
+- Settings screen
+- Help screen 
+- Select Year screen with available years and files inside those years and input for years and keywords
+- Loading screen with number of files being processed, what year and if keyword specified
+- Results screen with regional association results table (place, name and points/score)
+- Save to CSV option
+- Toggle disqualified/DNS/DQ tags
+- Toggle show file errors
+- Modify Scoring criteria (Place:Score)
+- Error and success Messageboxes
 
 ## Installation
 
