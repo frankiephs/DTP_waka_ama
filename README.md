@@ -12,13 +12,12 @@ A graphical User Interface program programmed in python that read and scores .li
 ![demo using Windows 10](demo-ezgif.com-video-to-gif-converter.gif)
 
 ## Screenshots
-
-![Homescreen](HomeScreen.png)
-![Help screen](helpscreen.png)
-![Loading Screen](LoadingScreen.png)
-![Results Screen](ResultsScreen.png)
-![Select Year Screen](selectYearScreen.png)
-![Settings screen](Settings.png)
+<img src="HomeScreen.png" alt="Home Screen" width="500"/>
+<img src="helpscreen.png" alt="Help Screen" width="500"/>
+<img src="LoadingScreen.png" alt="loading Screen" width="500"/>
+<img src="ResultsScreen.png" alt="Results Screen" width="500"/>
+<img src="selectYearScreen.png" alt="select Year Screen" width="500"/>
+<img src="Settings.png" alt="Settings screen" width="500"/>
 
 
 ## Features
