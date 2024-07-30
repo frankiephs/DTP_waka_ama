@@ -92,7 +92,7 @@ In case you made an error, just copy paste this default settings for the scoring
 
 #### How to reset settings
 
-to reset settings, go to the cloned folder and clear the program.settings contents. This will reset back to default.
+- to reset settings, go to the cloned folder and clear the program.settings contents. This will reset back to default.
 
 ## Authors
 
